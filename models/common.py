@@ -72,6 +72,25 @@ class Swish(nn.Module):
     def forward(self, x):
         return x * self.s(x)
 
+class MyReLU(nn.Module):
+    def __init__(self, inplace=False):
+        super().__init__()
+        self.inplace = inplace
+
+    def forward(self, input_tensor):
+        if self.inplace:
+            return torch.clamp_(input_tensor, min=0)
+        else:
+            return torch.clamp(input_tensor, min=0)
+
+class Modulo(nn.Module):
+    def __init__(self, inplace=False):
+        super().__init__()
+        self.inplace = inplace
+
+    def forward(self, input_tensor):
+        return torch.abs(input_tensor)
+
 
 def act(act_fun = 'LeakyReLU'):
     '''
@@ -88,6 +107,8 @@ def act(act_fun = 'LeakyReLU'):
             return nn.ELU()
         elif act_fun == 'none':
             return nn.Sequential()
+        elif act_fun == 'Modulo':
+            return nn.Modulo(inplace=True)
         else:
             assert False
     else:
