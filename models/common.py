@@ -89,6 +89,58 @@ class Modulus(nn.Module):
     def forward(self, input_tensor):
         return torch.abs(input_tensor)
 
+class ArchitecturalActivation(nn.Module):
+    """
+    Custom activation optimized for architectural features
+    Preserves sharp edges and straight lines
+    """
+
+    def __init__(self, alpha=0.2, beta=0.5):
+        super(ArchitecturalActivation, self).__init__()
+        self.alpha = alpha
+        self.beta = beta
+        self.leaky = nn.LeakyReLU(alpha, inplace=True)
+
+    def forward(self, x):
+        # Calculate structure tensor to detect edge directions
+        dx = torch.abs(x[:, :, :, 1:] - x[:, :, :, :-1])
+        dy = torch.abs(x[:, :, 1:, :] - x[:, :, :-1, :])
+
+        # Pad to maintain dimensions
+        dx = nn.functional.pad(dx, (0, 1, 0, 0), mode='replicate')
+        dy = nn.functional.pad(dy, (0, 0, 0, 1), mode='replicate')
+
+        # Edge strength
+        edge_strength = torch.sqrt(dx.pow(2) + dy.pow(2))
+
+        # Create adaptive weight
+        weight = torch.sigmoid(self.beta * edge_strength)
+
+        # Apply weighted activation - preserves more of the original signal at edges
+        return x * weight + self.leaky(x) * (1 - weight)
+
+
+class FrequencyAwareActivation(nn.Module):
+    """
+    Treats high and low frequency components differently
+    Better for preserving both structural elements and textures
+    """
+
+    def __init__(self):
+        super(FrequencyAwareActivation, self).__init__()
+        self.relu = nn.ReLU(inplace=True)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        # Simple high-pass filter (Laplacian approximation)
+        avg_pool = nn.functional.avg_pool2d(x, kernel_size=3, stride=1, padding=1)
+        high_freq = torch.abs(x - avg_pool)
+
+        # Apply different activations based on frequency content
+        # Gentler on high-frequency components, stronger on low-frequency
+        weight = self.sigmoid(high_freq)
+        return x * weight + self.relu(x) * (1 - weight)
+
 
 def act(act_fun = 'LeakyReLU'):
     '''
@@ -107,6 +159,10 @@ def act(act_fun = 'LeakyReLU'):
             return nn.Sequential()
         elif act_fun == 'Modulus':
              return Modulus()
+        elif act_fun == 'Architectural':
+            return ArchitecturalActivation()
+        elif act_fun == 'FrequencyAware':
+            return FrequencyAwareActivation()
         else:
             assert False
     else:
