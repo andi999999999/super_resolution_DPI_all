@@ -79,9 +79,9 @@ class MyReLU(nn.Module):
 
     def forward(self, input_tensor):
         if self.inplace:
-            return torch.clamp_(input_tensor, min=0)
+            return torch.clamp_(input_tensor*1.5, min=0)
         else:
-            return torch.clamp(input_tensor, min=0)
+            return torch.clamp(input_tensor*1.5, min=0)
 
 class Modulus(nn.Module):
     def __init__(self):
@@ -161,8 +161,8 @@ def act(act_fun = 'LeakyReLU'):
              return Modulus()
         elif act_fun == 'Architectural':
             return ArchitecturalActivation()
-        elif act_fun == 'FrequencyAware':
-            return FrequencyAwareActivation()
+        elif act_fun == 'MyReLU':
+            return MyReLU()
         else:
             assert False
     else:
