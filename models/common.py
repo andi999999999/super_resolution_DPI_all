@@ -99,7 +99,7 @@ class ArchitecturalActivation(nn.Module):
         super(ArchitecturalActivation, self).__init__()
         self.alpha = alpha
         self.beta = beta
-        self.leaky = nn.LeakyReLU(alpha, inplace=True)
+        self.leaky = nn.LeakyReLU(alpha, inplace=False)
 
     def forward(self, x):
         # Calculate structure tensor to detect edge directions
@@ -128,7 +128,7 @@ class FrequencyAwareActivation(nn.Module):
 
     def __init__(self):
         super(FrequencyAwareActivation, self).__init__()
-        self.relu = nn.ReLU(inplace=True)
+        self.relu = nn.ReLU(inplace=False)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
