@@ -79,9 +79,9 @@ class MyReLU(nn.Module):
 
     def forward(self, input_tensor):
         if self.inplace:
-            return torch.clamp_(input_tensor*0.8, min=0)
+            return torch.clamp_(input_tensor*0.9, min=0)
         else:
-            return torch.clamp(input_tensor*0.8, min=0)
+            return torch.clamp(input_tensor*0.9, min=0)
 
 class Modulus(nn.Module):
     def __init__(self):
