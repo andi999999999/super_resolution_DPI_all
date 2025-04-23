@@ -95,7 +95,7 @@ class ArchitecturalActivation(nn.Module):
     Preserves sharp edges and straight lines
     """
 
-    def __init__(self, alpha=0.2, beta=0.5):
+    def __init__(self, alpha=0.2, beta=0.05):
         super(ArchitecturalActivation, self).__init__()
         self.alpha = alpha
         self.beta = beta
